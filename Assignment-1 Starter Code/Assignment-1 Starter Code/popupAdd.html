@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Job</title>
+    <!-- Include jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* CSS styles for the popup */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .popup-content {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* Style for the buttons */
+        #button-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        #addJobButton,
+        #clearButton {
+            margin-right: 10px;
+        }
+
+        /* Style for side-by-side checkboxes */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-content">
+        <!-- Close button for the popup -->
+        <span class="close-button" onclick="closePopup()">&#10006;</span>
+        <h2>Add Job</h2>
+        <form id="jobForm">
+            <!-- Input fields for job information -->
+            <label for="company">Company:</label>
+            <input type="text" id="company" name="company" required><br>
+
+            <label for="position">Position:</label>
+            <input type="text" id="position" name="position" required><br>
+
+            <label for="role">Role:</label>
+            <input type="text" id="role" name="role" required><br>
+
+            <label for="level">Level:</label>
+            <input type="text" id="level" name="level" required><br>
+
+            <label for="postedAt">Posted At:</label>
+            <input type="text" id="postedAt" name="postedAt" required><br>
+
+            <label for="contract">Contract:</label>
+            <input type="text" id="contract" name="contract" required><br>
+
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" required><br>
+
+            <label for="languages">Languages (comma-separated):</label>
+            <input type="text" id="languages" name="languages" required><br>
+
+            <label for="tools">Tools (comma-separated):</label>
+            <input type="text" id="tools" name="tools" required><br>
+
+            <div id="button-container">
+                <!-- Buttons for adding a job and clearing the form -->
+                <button id="addJobButton" type="button">Add Job</button>
+                <button id="clearButton" type="button">Clear</button>
+            </div>
+            <div id="error-message" class="error-message"></div>
+        </form>
+    </div>
+
+    <script>
+        // Function to close the popup
+        function closePopup() {
+            // Remove the iframe from the parent window
+            window.parent.document.getElementById("popupContainer").innerHTML = "";
+        }
+
+        // Function to clear the form fields
+        $("#clearButton").click(function () {
+            $("#jobForm")[0].reset();
+            $("#error-message").text("");
+        });
+
+        // Function to handle adding a job
+        $("#addJobButton").click(function () {
+            // Retrieve values from input fields
+            const company = $("#company").val();
+            const position = $("#position").val();
+            const role = $("#role").val();
+            const level = $("#level").val();
+            const postedAt = $("#postedAt").val();
+            const contract = $("#contract").val();
+            const location = $("#location").val();
+            const languages = $("#languages").val().split(",");
+            const tools = $("#tools").val().split(",");
+
+            // Check if any field is empty
+            if (company === "" || position === "" || role === "" || level === "" || postedAt === "" || contract === "" || location === "" || languages === "" || tools === "") {
+                $("#error-message").text("All fields are required.");
+                return;
+            }
+
+            // Create a new job object
+            const newJob = {
+                "company": company,
+                "position": position,
+                "role": role,
+                "level": level,
+                "postedAt": postedAt,
+                "contract": contract,
+                "location": location,
+                "languages": languages,
+                "tools": tools,
+            };
+
+            // Call a function in the parent window to add the new job
+            window.parent.addNewJob(newJob);
+            
+            // Close the popup
+            closePopup();
+        });
+    </script>
+</body>
+</html>
