@@ -1,26 +1,20 @@
-// Initialize an empty array to store the current job listings and an empty object to store filters
 let currentStack = [];
 let filters = {};
 
-// Select DOM elements using jQuery
-const container = $(".container"); // Container for job listings
-const currentitems = $(".current-stack"); // Container for filtered job listings
-const clearButton = $(".clear-btn"); // Button to clear filters
+const container = $(".container");
+const currentitems = $(".current-stack");
+const clearButton = $(".clear-btn");
 
-// Attach a click event listener to the clear button to clear all filters
 clearButton.on("click", clearAllFilters);
 
-// Fetch JSON data from "data.json" and create initial job listings on the UI
 $.getJSON("data.json", function (information) {
     createInitialElements(information);
 }).then(function () {
-    // Attach click event listeners to filter buttons
     const filterItems = $("[data-label=filterItem]");
+
     filterItems.on("click", function (event) {
-        // Clone the clicked filter button and change its data-label to "filteredItem"
         let filterClone = $(this).clone();
         filterClone.attr("data-label", "filteredItem");
-        // Check if the filter is not already applied, then filter the job listings
         if (!filters[$(this).text()]) {
             filterStack($(this).text(), filterClone);
             filteredEvent(filterClone);
@@ -28,27 +22,51 @@ $.getJSON("data.json", function (information) {
     });
 });
 
-// Function to delete a job listing from the currentStack
+// Add a function to delete a job listing
 function deleteJob(index) {
     // Remove the job from the currentStack array
     currentStack.splice(index, 1);
 
-    // Remove the job from the UI by its index
+    // Remove the job from the UI
     container.children().eq(index).remove();
 }
 
-// Function to create initial job listings on the UI
 function createInitialElements(peopleData) {
     $.each(peopleData, function (index, person) {
-        // Create HTML elements for each job listing
         let change = $("<div>").addClass("block flex flex--a-center flex--j-between").addClass(person.featured ? 'featured' : '');
         let element = `
-            <!-- HTML template for a job listing -->
+            <div class="flex flex--a-center flex--name-gap">
+                <img class="website-image" src="${person.logo}" alt="logo of website">
+                <div class="flex flex--column flex--j-around flex--company-gap">
+                    <div class="flex flex--a-center flex--feature-gap">
+                        <p class="f-15 f-700 dd-cyan">${person.company}</p>
+                        ${person.new ? '<div class="new dd-cyan-bg f-700">NEW!</div>' : ''}
+                        ${person.featured ? '<div class="featured-true vdg-cyan-bg f-700">FEATURED</div>' : ''}
+                    </div>
+                    <p class="f-20 f-700">${person.position}</p>
+                    <div class="flex flex--contract-gap">
+                        <p class="n-links f-15 l-dark">${person.postedAt}</p>
+                        <p class="n-links f-15 l-dark">${person.contract}</p>
+                        <p class="n-links f-15 l-dark">${person.location}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex--skills-gap">
+                <button data-label="filterItem" class="f-14">${person.role}</button>
+                <button data-label="filterItem" class="f-14">${person.level}</button>
+                ${$.map(person.languages, function (language) {
+                    return `<button data-label="filterItem" class="f-14">${language}</button>`;
+                }).join("")}
+                ${$.map(person.tools, function (tool) {
+                    return `<button data-label="filterItem" class="f-14">${tool}</button>`;
+                }).join("")}
+            </div>
+            <div class="flex flex--a-center">
+                <button class="delete-btn f-14">Delete</button>
+            </div>
         `;
         change.html(element);
         container.append(change);
-
-        // Add the job listing to the currentStack array
         currentStack.push({
             attributes: [person.role, person.level, ...person.languages, ...person.tools],
             available: true,
@@ -56,14 +74,13 @@ function createInitialElements(peopleData) {
         });
     });
 
-    // Attach click event listener for delete buttons
+    // Add event listener for delete buttons
     $(".delete-btn").on("click", function () {
         const jobIndex = $(this).closest('.block').index();
         deleteJob(jobIndex);
     });
 }
 
-// Function to filter the job listings based on the selected filter
 function filterStack(filter, element) {
     currentitems.prepend(element);
     $.each(currentStack, function (index, stack) {
@@ -76,7 +93,6 @@ function filterStack(filter, element) {
     checkFilterContainer();
 }
 
-// Function to check and update the visibility of the filter container
 function checkFilterContainer() {
     if (currentitems.children("[data-label=filteredItem]").length > 0) {
         currentitems.removeClass("d-none");
@@ -85,7 +101,6 @@ function checkFilterContainer() {
     }
 }
 
-// Function to handle the click event on filtered items for removal
 function filteredEvent(filter) {
     filter.on("click", function () {
         delete filters[filter.text()];
@@ -95,7 +110,6 @@ function filteredEvent(filter) {
     });
 }
 
-// Function to unfilter job listings
 function unFilterStack() {
     const filterKeys = Object.keys(filters);
     $.each(currentStack, function (index, stack) {
@@ -107,7 +121,6 @@ function unFilterStack() {
     });
 }
 
-// Function to clear all applied filters
 function clearAllFilters() {
     const filterItems = $("[data-label=filteredItem]");
     filterItems.remove();
@@ -119,7 +132,6 @@ function clearAllFilters() {
 }
 
 $(document).ready(function () {
-    // Attach a click event listener to open the popup
     const openButton = $("#openPopup");
     const popupContainer = $("#popupContainer");
 
@@ -135,15 +147,14 @@ $(document).ready(function () {
     });
 });
 
-// Function to add a new job to the data.json file
+
+
 function addNewJob(newJob) {
    fetch("data.json")
        .then(response => response.json())
        .then(data => {
-           // Push the new job to the data array
            data.push(newJob);
 
-           // Send a POST request to update the data.json file
            return fetch("data.json", {
                method: "POST",
                headers: {
@@ -153,9 +164,8 @@ function addNewJob(newJob) {
            });
        })
        .then(() => {
-           // Show a success alert and update the UI with the new job
            alert("Job added successfully!");
-           createInitialElements([newJob]);
+           createInitialElements([newJob]); // Update the UI with the new job
        })
        .catch(error => console.error("Error:", error));
 }
